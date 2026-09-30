@@ -1,0 +1,17 @@
+name: ai_overlay_app
+description: Aplikasi AI Overlay Penjawab Soal
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_overlay_window: ^0.4.0
+  google_generative_ai: ^0.4.0
+  http: ^1.2.0
+
+flutter:
+  uses-material-design: true
