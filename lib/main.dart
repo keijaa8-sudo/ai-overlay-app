@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
+// Entry point khusus untuk jendela melayang (Gelembung AI)
 @pragma("vm:entry-point")
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: FloatingWidget(),
-  ));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: OverlayWidget(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,24 +23,84 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text("AI Assistant Overlay")),
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () async {
-              bool status = await FlutterOverlayWindow.isPermissionGranted();
-              if (!status) {
-                await FlutterOverlayWindow.requestPermission();
-              } else {
-                await FlutterOverlayWindow.showOverlay(
-                  height: 300,
-                  width: 300,
-                  alignment: OverlayAlignment.centerRight,
-                  flag: OverlayFlag.defaultFlag,
-                );
-              }
-            },
-            child: const Text("Aktifkan AI Melayang"),
+      debugShowCheckedModeBanner: false,
+      title: 'AI Overlay App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isOverlayActive = false;
+
+  Future<void> _toggleOverlay() async {
+    // Meminta izin tampil di atas aplikasi lain
+    final bool? status = await FlutterOverlayWindow.isPermissionGranted();
+    if (status == null || !status) {
+      await FlutterOverlayWindow.requestPermission();
+      return;
+    }
+
+    if (_isOverlayActive) {
+      await FlutterOverlayWindow.closeOverlay();
+      setState(() {
+        _isOverlayActive = false;
+      });
+    } else {
+      await FlutterOverlayWindow.showOverlay(
+        height: 300,
+        width: 300,
+        alignment: OverlayAlignment.center,
+        flag: OverlayFlag.defaultFlag,
+        visibility: NotificationVisibility.visibilityPublic,
+        positionGravity: PositionGravity.auto,
+      );
+      setState(() {
+        _isOverlayActive = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AI Overlay Assistant')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.smart_toy, size: 80, color: Colors.blue),
+              const SizedBox(height: 20),
+              const Text(
+                'Asisten AI Melayang',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Tekan tombol di bawah untuk mengaktifkan gelembung karakter AI di atas aplikasi lain!',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: _toggleOverlay,
+                icon: Icon(_isOverlayActive ? Icons.close : Icons.play_arrow),
+                label: Text(_isOverlayActive ? 'Matikan AI Melayang' : 'Aktifkan AI Melayang'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -47,98 +108,105 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class FloatingWidget extends StatefulWidget {
-  const FloatingWidget({super.key});
+// Tampilan Gelembung Melayang (Berbentuk Karakter/Robot AI)
+class OverlayWidget extends StatefulWidget {
+  const OverlayWidget({super.key});
 
   @override
-  State<FloatingWidget> createState() => _FloatingWidgetState();
+  State<OverlayWidget> createState() => _OverlayWidgetState();
 }
 
-class _FloatingWidgetState extends State<FloatingWidget> {
-  String _response = "Tekan tombol untuk menjawab soal";
-  bool _isLoading = false;
-
-  final String _apiKey = "YOUR_GEMINI_API_KEY";
-
-  Future<void> _getAnswerFromAI(String questionText) async {
-    setState(() {
-      _isLoading = true;
-      _response = "Menganalisis soal...";
-    });
-
-    try {
-      final model = GenerativeModel(
-        model: 'gemini-1.5-flash',
-        apiKey: _apiKey,
-      );
-      
-      final prompt = "Jawab soal berikut secara singkat dan akurat:\n$questionText";
-      final content = [Content.text(prompt)];
-      final response = await model.generateContent(content);
-
-      setState(() {
-        _response = response.text ?? "Tidak ada jawaban.";
-      });
-    } catch (e) {
-      setState(() {
-        _response = "Gagal mengambil jawaban: $e";
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+class _OverlayWidgetState extends State<OverlayWidget> {
+  String _response = "Halo! Ada tugas online yang mau dibantu?";
+  bool _isOpen = false;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 10)
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "🤖 AI Penjawab",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+      child: Center(
+        child: _isOpen
+            ? Container(
+                width: 280,
+                height: 250,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2)
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () => FlutterOverlayWindow.closeOverlay(),
-                )
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(
-                  _response,
-                  style: const TextStyle(fontSize: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.blue,
+                              child: Icon(Icons.smart_toy, size: 16, color: Colors.white),
+                            ),
+                            SizedBox(width: 8),
+                            Text('AI Assistant', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () {
+                            setState(() {
+                              _isOpen = false;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Text(_response, style: const TextStyle(fontSize: 14)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 32)),
+                      onPressed: () {
+                        setState(() {
+                          _response = "Fitur AI terhubung! Silakan masukkan pertanyaan tugasmu berikutnya.";
+                        });
+                      },
+                      child: const Text('Tanya AI', style: TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+              )
+            : GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isOpen = true;
+                  });
+                },
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    shape: BoxShape.circle,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black38, blurRadius: 6, spreadRadius: 2)
+                    ],
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.smart_toy,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                _getAnswerFromAI("Hari Olahraga Nasional diperingati setiap tanggal?");
-              },
-              child: _isLoading 
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text("Jawab Soal"),
-            )
-          ],
-        ),
       ),
     );
   }
