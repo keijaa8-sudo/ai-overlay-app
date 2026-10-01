@@ -5,14 +5,14 @@ void main() {
   runApp(const MyApp());
 }
 
-// Entry point khusus untuk jendela melayang (Karakter Anime Alya)
+// Wajib ada agar sistem Android bisa mengenali jendela melayang di luar aplikasi
 @pragma("vm:entry-point")
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: OverlayWidget(),
+      home: AlyaOverlayWidget(),
     ),
   );
 }
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Anime AI Overlay',
+      title: 'Alya AI Assistant',
       theme: ThemeData(primarySwatch: Colors.pink),
       home: const HomeScreen(),
     );
@@ -39,45 +39,46 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isOverlayActive = false;
+  bool _isOverlayRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _checkOverlayStatus();
+    _checkStatus();
   }
 
-  Future<void> _checkOverlayStatus() async {
+  Future<void> _checkStatus() async {
     final bool isActive = await FlutterOverlayWindow.isActive();
     setState(() {
-      _isOverlayActive = isActive;
+      _isOverlayRunning = isActive;
     });
   }
 
   Future<void> _toggleOverlay() async {
-    final bool? status = await FlutterOverlayWindow.isPermissionGranted();
-    if (status == null || !status) {
+    // Memastikan izin tampil di atas aplikasi lain sudah diberikan
+    final bool? hasPermission = await FlutterOverlayWindow.isPermissionGranted();
+    if (hasPermission == null || !hasPermission) {
       await FlutterOverlayWindow.requestPermission();
       return;
     }
 
-    if (_isOverlayActive) {
+    if (_isOverlayRunning) {
       await FlutterOverlayWindow.closeOverlay();
       setState(() {
-        _isOverlayActive = false;
+        _isOverlayRunning = false;
       });
     } else {
-      // Mengatur ukuran jendela overlay agar pas dengan gelembung/kotak interaktif
+      // Membuka jendela melayang dengan ukuran kotak yang pas
       await FlutterOverlayWindow.showOverlay(
-        height: 350,
-        width: 320,
+        height: 320,
+        width: 300,
         alignment: OverlayAlignment.center,
         flag: OverlayFlag.defaultFlag,
         visibility: NotificationVisibility.visibilityPublic,
         positionGravity: PositionGravity.auto,
       );
       setState(() {
-        _isOverlayActive = true;
+        _isOverlayRunning = true;
       });
     }
   }
@@ -85,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Alya Anime AI Assistant')),
+      appBar: AppBar(title: const Text('Alya AI Assistant')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -95,20 +96,20 @@ class _HomeScreenState extends State<HomeScreen> {
               const Icon(Icons.favorite, size: 80, color: Colors.pinkAccent),
               const SizedBox(height: 20),
               const Text(
-                'Alya-san AI Melayang',
+                'Gelembung Alya-san',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
-                'Tekan tombol di bawah untuk memunculkan gelembung karakter Alya di atas layar!',
+                'Tekan tombol di bawah, lalu keluar ke menu utama (Home) untuk melihat gelembung Alya!',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: _toggleOverlay,
-                icon: Icon(_isOverlayActive ? Icons.close : Icons.play_arrow),
-                label: Text(_isOverlayActive ? 'Matikan AI Alya' : 'Aktifkan AI Alya'),
+                icon: Icon(_isOverlayRunning ? Icons.close : Icons.play_arrow),
+                label: Text(_isOverlayRunning ? 'Sembunyikan Alya' : 'Tampilkan Gelembung Alya'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pinkAccent,
                   foregroundColor: Colors.white,
@@ -123,34 +124,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Tampilan Gelembung Melayang Karakter Alya
-class OverlayWidget extends StatefulWidget {
-  const OverlayWidget({super.key});
+// Widget Tampilan Gelembung Karakter Alya di Luar Aplikasi
+class AlyaOverlayWidget extends StatefulWidget {
+  const AlyaOverlayWidget({super.key});
 
   @override
-  State<OverlayWidget> createState() => _OverlayWidgetState();
+  State<AlyaOverlayWidget> createState() => _AlyaOverlayWidgetState();
 }
 
-class _OverlayWidgetState extends State<OverlayWidget> {
-  String _response = "Moshi-moshi! Ada tugas atau soal yang mau dibantu sama Alya, Senpai? (umu)";
-  bool _isOpen = false;
+class _AlyaOverlayWidgetState extends State<AlyaOverlayWidget> {
+  bool _isExpanded = false;
+  String _message = "Moshi-moshi! Ada tugas atau soal yang mau dibantu sama Alya, Senpai? (✨ω✨)";
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: Center(
-        child: _isOpen
+        child: _isExpanded
             ? Container(
-                width: 280,
-                height: 260,
+                width: 270,
+                height: 240,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.pinkAccent, width: 2),
+                  border: Border.all(color: Colors.pinkAccent, width: 2.5),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black38, blurRadius: 10, spreadRadius: 2)
+                    BoxShadow(color: Colors.black45, blurRadius: 10, spreadRadius: 2)
                   ],
                 ),
                 child: Column(
@@ -172,10 +173,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close, size: 18),
-                          onPressed: () async {
-                            // Menutup total overlay atau kembali ke bentuk gelembung
+                          onPressed: () {
                             setState(() {
-                              _isOpen = false;
+                              _isExpanded = false;
                             });
                           },
                         ),
@@ -184,19 +184,19 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                     const Divider(),
                     Expanded(
                       child: SingleChildScrollView(
-                        child: Text(_response, style: const TextStyle(fontSize: 14)),
+                        child: Text(_message, style: const TextStyle(fontSize: 13, color: Colors.black87)),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pinkAccent,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 32),
+                        minimumSize: const Size(double.infinity, 30),
                       ),
                       onPressed: () {
                         setState(() {
-                          _response = "Ganbatte! Ketik saja pertanyaanmu, Alya siap bantu jawab ya! (✨ω✨)";
+                          _message = "Ganbatte ne! Ketik saja pertanyaannya, Alya siap bantu jawab! (•̀ᴗ•́)و";
                         });
                       },
                       child: const Text('Tanya Alya', style: TextStyle(fontSize: 12)),
@@ -207,7 +207,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             : GestureDetector(
                 onTap: () {
                   setState(() {
-                    _isOpen = true;
+                    _isExpanded = true;
                   });
                 },
                 child: Container(
@@ -217,15 +217,15 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                     color: Colors.pinkAccent,
                     shape: BoxShape.circle,
                     boxShadow: const [
-                      BoxShadow(color: Colors.black38, blurRadius: 6, spreadRadius: 2)
+                      BoxShadow(color: Colors.black45, blurRadius: 8, spreadRadius: 2)
                     ],
-                    border: Border.all(color: Colors.white, width: 2.5),
+                    border: Border.all(color: Colors.white, width: 3),
                   ),
                   child: const Center(
                     child: Icon(
-                      Icons.favorite, // Ikon karakter Alya/Anime
+                      Icons.favorite,
                       color: Colors.white,
-                      size: 36,
+                      size: 34,
                     ),
                   ),
                 ),
