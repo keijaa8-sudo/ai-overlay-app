@@ -8,8 +8,8 @@
     <application
         android:label="Alya AI Assistant"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round">
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:roundIcon="@android:drawable/ic_menu_agenda">
         
         <activity
             android:name=".MainActivity"
@@ -27,7 +27,7 @@
               />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                <category android:name="category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
