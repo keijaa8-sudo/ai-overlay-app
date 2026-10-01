@@ -5,7 +5,7 @@ void main() {
   runApp(const MyApp());
 }
 
-// Entry point khusus untuk jendela melayang (Gelembung AI)
+// Entry point khusus untuk jendela melayang (Gelembung Anime AI)
 @pragma("vm:entry-point")
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +24,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'AI Overlay App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'Anime AI Overlay',
+      theme: ThemeData(primarySwatch: Colors.pink),
       home: const HomeScreen(),
     );
   }
@@ -42,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isOverlayActive = false;
 
   Future<void> _toggleOverlay() async {
-    // Meminta izin tampil di atas aplikasi lain
     final bool? status = await FlutterOverlayWindow.isPermissionGranted();
     if (status == null || !status) {
       await FlutterOverlayWindow.requestPermission();
@@ -56,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } else {
       await FlutterOverlayWindow.showOverlay(
-        height: 300,
+        height: 320,
         width: 300,
         alignment: OverlayAlignment.center,
         flag: OverlayFlag.defaultFlag,
@@ -72,22 +71,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Overlay Assistant')),
+      appBar: AppBar(title: const Text('Anime AI Assistant')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.smart_toy, size: 80, color: Colors.blue),
+              const Icon(Icons.face_retouching_natural, size: 80, color: Colors.pinkAccent),
               const SizedBox(height: 20),
               const Text(
-                'Asisten AI Melayang',
+                'Waifu/Karakter Anime AI',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
-                'Tekan tombol di bawah untuk mengaktifkan gelembung karakter AI di atas aplikasi lain!',
+                'Tekan tombol di bawah untuk memunculkan gelembung karakter anime di atas layar!',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
@@ -95,8 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ElevatedButton.icon(
                 onPressed: _toggleOverlay,
                 icon: Icon(_isOverlayActive ? Icons.close : Icons.play_arrow),
-                label: Text(_isOverlayActive ? 'Matikan AI Melayang' : 'Aktifkan AI Melayang'),
+                label: Text(_isOverlayActive ? 'Matikan AI Anime' : 'Aktifkan AI Anime'),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
               ),
@@ -108,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Tampilan Gelembung Melayang (Berbentuk Karakter/Robot AI)
+// Tampilan Gelembung Melayang Karakter Anime
 class OverlayWidget extends StatefulWidget {
   const OverlayWidget({super.key});
 
@@ -117,7 +118,7 @@ class OverlayWidget extends StatefulWidget {
 }
 
 class _OverlayWidgetState extends State<OverlayWidget> {
-  String _response = "Halo! Ada tugas online yang mau dibantu?";
+  String _response = "Konnichiwa! Ada tugas atau soal yang perlu kubantu hari ini, Senpai?";
   bool _isOpen = false;
 
   @override
@@ -128,11 +129,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         child: _isOpen
             ? Container(
                 width: 280,
-                height: 250,
+                height: 260,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.pinkAccent, width: 2),
                   boxShadow: const [
                     BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 2)
                   ],
@@ -147,11 +149,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                           children: [
                             CircleAvatar(
                               radius: 14,
-                              backgroundColor: Colors.blue,
-                              child: Icon(Icons.smart_toy, size: 16, color: Colors.white),
+                              backgroundColor: Colors.pinkAccent,
+                              child: Icon(Icons.face_retouching_natural, size: 16, color: Colors.white),
                             ),
                             SizedBox(width: 8),
-                            Text('AI Assistant', style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text('Anime AI', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pink)),
                           ],
                         ),
                         IconButton(
@@ -172,13 +174,17 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 32)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pinkAccent,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 32),
+                      ),
                       onPressed: () {
                         setState(() {
-                          _response = "Fitur AI terhubung! Silakan masukkan pertanyaan tugasmu berikutnya.";
+                          _response = "Ganbatte ne! Ketik atau tanyakan soalmu, aku siap bantu jawab! (✨ω✨)";
                         });
                       },
-                      child: const Text('Tanya AI', style: TextStyle(fontSize: 12)),
+                      child: const Text('Minta Bantuan', style: TextStyle(fontSize: 12)),
                     ),
                   ],
                 ),
@@ -190,20 +196,22 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                   });
                 },
                 child: Container(
-                  width: 60,
-                  height: 60,
+                  width: 65,
+                  height: 65,
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent,
+                    color: Colors.pinkAccent,
                     shape: BoxShape.circle,
                     boxShadow: const [
                       BoxShadow(color: Colors.black38, blurRadius: 6, spreadRadius: 2)
                     ],
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: Colors.white, width: 2.5),
                   ),
-                  child: const Icon(
-                    Icons.smart_toy,
-                    color: Colors.white,
-                    size: 32,
+                  child: const Center(
+                    child: Icon(
+                      Icons.face_retouching_natural, // Ikon karakter anime/wajah
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                 ),
               ),
